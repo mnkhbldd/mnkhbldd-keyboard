@@ -1,0 +1,66 @@
+/*
+ * Copyright 2009 Odbayar Nyamtseren <odbayar.n@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <winuser.h>
+#include <immdev.h>
+#include <winver.h>
+#include "Version.h"
+#include "Resource.h"
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+IDI_BUUZ    ICON    "buuz.ico"
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+1 VERSIONINFO
+FILEVERSION     VERSION_MAJOR,VERSION_MINOR,VERSION_SUBMINOR,0
+PRODUCTVERSION  VERSION_MAJOR,VERSION_MINOR,VERSION_SUBMINOR,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+#ifdef DEBUG
+FILEFLAGS       (VS_FF_PRIVATEBUILD | VS_FF_DEBUG)
+#else
+FILEFLAGS       0
+#endif
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_DRV
+FILESUBTYPE     VFT2_DRV_INPUTMETHOD
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "045004B0" // Lang=Mongolian, CharSet=Unicode
+        BEGIN
+            VALUE "CompanyName", "Buuz Project\0"
+            VALUE "FileDescription", "Buuz\0"
+            VALUE "FileVersion", VERSION_STRING 0
+            VALUE "InternalName", "buuz\0"
+            VALUE "LegalCopyright", "Copyright (C) Odbayar Nyamtseren\0"
+            VALUE "OriginalFilename", "buuz.ime\0"
+            VALUE "ProductName", "Buuz\0"
+            VALUE "ProductVersion", VERSION_STRING 0
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x450, 1200
+    END
+END
