@@ -217,6 +217,12 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     if ([self isComposing])
         [self commitIfNeeded:client];
 
+    // Return / Enter must be handed to the app (insertNewline:). Inserting
+    // "\r" via insertText often does nothing; Cmd+Enter worked only because
+    // Command modifiers already returned NO above.
+    if (keyCode == 36 || keyCode == 76)
+        return NO;
+
     // Backspace / navigation when not composing → let the app handle it.
     if (virtKey == VK_BACK || virtKey == VK_DELETE ||
         virtKey == VK_LEFT || virtKey == VK_RIGHT ||
@@ -225,10 +231,13 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
         return NO;
     }
 
-    // Space, digits, punctuation, return, etc. — must insert ourselves.
+    // Space, digits, punctuation, etc. — must insert ourselves.
+    // Do not insert \r/\n here; Return is handled above / via insertNewline:.
     if (string.length > 0) {
         unichar ch = [string characterAtIndex:0];
-        if (ch >= 0x20 || ch == '\t' || ch == '\r' || ch == '\n') {
+        if (ch == '\r' || ch == '\n')
+            return NO;
+        if (ch >= 0x20 || ch == '\t') {
             [self insertPlainText:string client:client];
             return YES;
         }
@@ -239,21 +248,22 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
 
 - (BOOL)didCommandBySelector:(SEL)aSelector client:(id)sender
 {
-    // Commit on mouse click / focus change style commands if composing.
-    if ([self isComposing] &&
-        (aSelector == @selector(insertNewline:) ||
-         aSelector == @selector(insertTab:) ||
-         aSelector == @selector(cancelOperation:))) {
+    // Commit composition, then let newline/tab reach the client.
+    if (aSelector == @selector(insertNewline:) ||
+        aSelector == @selector(insertTab:) ||
+        aSelector == @selector(cancelOperation:)) {
         id client = [self activeClient:sender];
-        if (aSelector == @selector(cancelOperation:)) {
-            CompString cs(*_imc);
-            if (cs.lock() && composer) {
-                composer->cancelComp(*_imc, cs);
-                [self applyComposerResult:client];
+        if ([self isComposing]) {
+            if (aSelector == @selector(cancelOperation:)) {
+                CompString cs(*_imc);
+                if (cs.lock() && composer) {
+                    composer->cancelComp(*_imc, cs);
+                    [self applyComposerResult:client];
+                }
+                return YES;
             }
-            return YES;
+            [self commitIfNeeded:client];
         }
-        [self commitIfNeeded:client];
         return NO; // let newline/tab still happen
     }
     return NO;
