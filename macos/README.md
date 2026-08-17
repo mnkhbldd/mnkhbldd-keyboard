@@ -69,6 +69,19 @@ cd macos
 make uninstall
 ```
 
+## Autocorrect
+
+On word commit, Buuz runs Hunspell against the bundled `mn_MN` dictionary. A word is replaced only when it is misspelled and there is a single high-confidence suggestion (one Hunspell suggestion, or exactly one suggestion with edit distance 1). Digits, punctuation, and 1-letter tokens are left unchanged.
+
+Dictionary files are fetched at build time:
+
+```bash
+cd macos
+./fetch-dict.sh
+```
+
+Credit: [bataak/dict-mn](https://github.com/bataak/dict-mn) (LPPL 1.3). Hunspell is vendored under `third_party/hunspell/`.
+
 ## Conversion table
 
 Same as Windows — see `../docs/table.html`.

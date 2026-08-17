@@ -12,6 +12,7 @@
 #include "InputContext.h"
 #include "CompString.h"
 #include "PlatformTypes.h"
+#import "SpellChecker.h"
 
 @interface BuuzInputController : IMKInputController
 @end
@@ -88,8 +89,9 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
 
     if (prv->pendingCommit) {
         NSString* result = utf16ToNSString(cs.resultStr.ptr(), cs.resultStr.size());
+        NSString* corrected = [[SpellChecker shared] maybeAutocorrect:result];
         [self clearMarkedText:client];
-        [self insertPlainText:result client:client];
+        [self insertPlainText:corrected client:client];
         cs.clearResult();
     } else if (prv->pendingCancel) {
         [self clearMarkedText:client];

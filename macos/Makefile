@@ -15,8 +15,9 @@ CXX      := clang++
 OBJCXX   := clang++
 CXXFLAGS := -std=c++17 -O2 -fobjc-arc \
             -Wall -Wno-unused-parameter \
-            -I.
-LDFLAGS  := -framework Cocoa -framework InputMethodKit -framework Carbon
+            -I. -Ithird_party/hunspell \
+            -DHUNSPELL_STATIC
+LDFLAGS  := -framework Cocoa -framework InputMethodKit -framework Carbon -framework Foundation
 
 # Optional: ARCHS="arm64 x86_64" for a universal release binary
 ifneq ($(strip $(ARCHS)),)
@@ -26,24 +27,41 @@ ifneq ($(strip $(ARCHS)),)
 endif
 
 CPP_SRCS := Composer.cpp CompString.cpp InputContext.cpp Globals.cpp HelperFunctions.cpp
-MM_SRCS  := Init.mm BuuzInputController.mm
+MM_SRCS  := Init.mm BuuzInputController.mm SpellChecker.mm
+
+HUNSPELL_DIR  := third_party/hunspell
+HUNSPELL_SRCS := affentry.cxx affixmgr.cxx csutil.cxx filemgr.cxx hashmgr.cxx \
+                 hunspell.cxx hunzip.cxx phonet.cxx replist.cxx suggestmgr.cxx
+HUNSPELL_OBJS := $(addprefix $(BUILD_DIR)/hunspell/,$(HUNSPELL_SRCS:.cxx=.o))
 
 CPP_OBJS := $(addprefix $(BUILD_DIR)/,$(CPP_SRCS:.cpp=.o))
 MM_OBJS  := $(addprefix $(BUILD_DIR)/,$(MM_SRCS:.mm=.o))
-OBJS     := $(CPP_OBJS) $(MM_OBJS)
+OBJS     := $(CPP_OBJS) $(MM_OBJS) $(HUNSPELL_OBJS)
 
-.PHONY: all clean install uninstall reinstall package
+DICT_DIR := Resources/dict
+DICT_AFF := $(DICT_DIR)/mn_MN.aff
+DICT_DIC := $(DICT_DIR)/mn_MN.dic
 
-all: $(BUILD_DIR)/$(APP_BUNDLE)
+.PHONY: all clean install uninstall reinstall package dict test-spell
 
-$(BUILD_DIR)/$(APP_BUNDLE): $(OBJS) Info.plist
-	@mkdir -p $(MACOS_DIR) $(RES_DIR)
+all: dict $(BUILD_DIR)/$(APP_BUNDLE)
+
+dict: $(DICT_AFF) $(DICT_DIC)
+
+$(DICT_AFF) $(DICT_DIC):
+	./fetch-dict.sh
+
+$(BUILD_DIR)/$(APP_BUNDLE): $(OBJS) Info.plist $(DICT_AFF) $(DICT_DIC)
+	@mkdir -p $(MACOS_DIR) $(RES_DIR)/dict
 	$(OBJCXX) $(OBJS) -o $(MACOS_DIR)/$(APP_NAME) $(LDFLAGS)
 	cp Info.plist $(CONTENTS)/
 	@if [ -f Resources/buuz.tiff ]; then cp Resources/buuz.tiff $(RES_DIR)/; \
 	 elif [ -f Resources/buuz.ico ]; then \
 	   sips -s format tiff Resources/buuz.ico --out $(RES_DIR)/buuz.tiff 2>/dev/null || true; \
 	 fi
+	cp $(DICT_AFF) $(DICT_DIC) $(RES_DIR)/dict/
+	@if [ -f $(DICT_DIR)/LICENSE ]; then cp $(DICT_DIR)/LICENSE $(RES_DIR)/dict/; fi
+	@if [ -f $(DICT_DIR)/README.md ]; then cp $(DICT_DIR)/README.md $(RES_DIR)/dict/; fi
 	codesign --force --deep --sign - $(BUILD_DIR)/$(APP_BUNDLE) 2>/dev/null || true
 	@echo "Built $(BUILD_DIR)/$(APP_BUNDLE)"
 
@@ -55,6 +73,10 @@ $(BUILD_DIR)/%.o: %.mm
 	@mkdir -p $(BUILD_DIR)
 	$(OBJCXX) $(CXXFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/hunspell/%.o: $(HUNSPELL_DIR)/%.cxx
+	@mkdir -p $(BUILD_DIR)/hunspell
+	$(CXX) $(filter-out -fobjc-arc,$(CXXFLAGS)) -w -c $< -o $@
+
 clean:
 	rm -rf $(BUILD_DIR)
 
@@ -65,6 +87,11 @@ uninstall:
 	./install.sh --uninstall
 
 reinstall: uninstall install
+
+test-spell: dict $(HUNSPELL_OBJS) $(BUILD_DIR)/SpellChecker.o
+	$(OBJCXX) $(CXXFLAGS) test_spell.mm $(BUILD_DIR)/SpellChecker.o $(HUNSPELL_OBJS) \
+	  -framework Foundation -o $(BUILD_DIR)/test_spell $(ARCH_FLAGS)
+	$(BUILD_DIR)/test_spell $(DICT_DIR)
 
 # Universal .app zip for GitHub Releases / Homebrew Cask
 package: clean

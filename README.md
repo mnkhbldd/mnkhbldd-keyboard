@@ -17,7 +17,7 @@ Prebuilt app — **no Xcode / compiler required**:
 
 ```bash
 brew tap mnkhbldd/mnkhbldd-keyboard https://github.com/mnkhbldd/mnkhbldd-keyboard
-brew update
+brew trust --cask mnkhbldd/mnkhbldd-keyboard/buuz
 brew install --cask buuz
 ```
 
@@ -47,6 +47,10 @@ cd macos && make && make install
 
 Then add **Buuz** under System Settings → Keyboard → Input Sources.
 
+On commit (space / Enter), Buuz may autocorrect a converted Cyrillic word when Hunspell has a single high-confidence suggestion.
+
 ## License
 
 Apache License 2.0 — see `LICENSE.txt`.
+
+Bundled with Hunspell (MPL/GPL/LGPL) and the [dict-mn](https://github.com/bataak/dict-mn) Mongolian dictionary (LPPL 1.3). See `NOTICE`.

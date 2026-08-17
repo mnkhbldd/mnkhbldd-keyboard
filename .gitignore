@@ -263,3 +263,8 @@ __pycache__/
 # macOS Input Method build
 macos/build/
 dist/
+
+# Hunspell dictionary fetched at build time (~19MB)
+macos/Resources/dict/mn_MN.aff
+macos/Resources/dict/mn_MN.dic
+macos/Resources/dict/LICENSE
