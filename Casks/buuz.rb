@@ -11,13 +11,23 @@ cask "buuz" do
 
   input_method "Buuz.app"
 
-  # Ad-hoc signed build: clear quarantine so Input Method Kit can load it.
   postflight do
     app = Pathname.new(Dir.home)/"Library/Input Methods/Buuz.app"
+
+    # Ad-hoc signed build: clear quarantine so Input Method Kit can load it.
     system_command "/usr/bin/xattr", args: ["-cr", app.to_s], sudo: false
     system_command "/usr/bin/codesign",
                    args: ["--force", "--deep", "--sign", "-", app.to_s],
                    sudo: false
+
+    # Input Method Kit keeps serving the previous binary until it is killed,
+    # so an upgrade otherwise appears to do nothing until the next login.
+    system_command "/usr/bin/pkill",
+                   args:         ["-f", "Input Methods/Buuz.app"],
+                   sudo:         false,
+                   must_succeed: false
+    sleep 1
+    system_command "/usr/bin/open", args: [app.to_s], sudo: false
   end
 
   zap trash: "~/Library/Input Methods/Buuz.app"

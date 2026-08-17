@@ -31,6 +31,14 @@ brew install --cask buuz
 
 Then add **Buuz** under System Settings → Keyboard → Input Sources.
 
+Update:
+
+```bash
+brew update && brew upgrade --cask buuz
+```
+
+The cask restarts the input method for you, so the new version takes effect immediately.
+
 Uninstall:
 
 ```bash

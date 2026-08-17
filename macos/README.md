@@ -37,6 +37,14 @@ Then:
 
 If it does not show up, log out and back in once.
 
+Update:
+
+```bash
+brew update && brew upgrade --cask buuz
+```
+
+Input Method Kit keeps serving the old binary after the app is replaced, so the cask's `postflight` kills and relaunches `Buuz.app`. No manual restart or logout is needed.
+
 Uninstall:
 
 ```bash
