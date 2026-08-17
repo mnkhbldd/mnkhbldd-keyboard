@@ -17,21 +17,14 @@ Type Latin → get Cyrillic, e.g. `buuz id'ye` → `бууз идье`.
 | `UiWindow.cpp` | handled inside IMK controller |
 | `buuz.nsi` / `.inf` | `install.sh` |
 
-## Build
-
-Requires Xcode Command Line Tools:
+## Install with Homebrew (recommended)
 
 ```bash
-cd macos
-make
+brew tap mnkhbldd/mnkhbldd-keyboard https://github.com/mnkhbldd/mnkhbldd-keyboard
+brew install buuz
 ```
 
-## Install
-
-```bash
-cd macos
-make install
-```
+This builds Buuz and installs it to `~/Library/Input Methods/Buuz.app`.
 
 Then:
 
@@ -42,7 +35,26 @@ Then:
 
 If it does not show up, log out and back in once.
 
-## Uninstall
+Uninstall:
+
+```bash
+buuz-ime uninstall
+brew uninstall buuz
+```
+
+After a `brew upgrade buuz`, re-link if needed: `buuz-ime install`.
+
+## Build from source
+
+Requires Xcode Command Line Tools (`clang++`), not the full Xcode app:
+
+```bash
+cd macos
+make
+make install
+```
+
+## Uninstall (from source)
 
 ```bash
 cd macos
