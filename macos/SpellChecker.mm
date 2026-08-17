@@ -118,6 +118,71 @@ static NSString* applyCase(NSString* original, NSString* suggestion)
     return suggestion;
 }
 
+// Latin input cannot distinguish these Cyrillic pairs, so the composer has to
+// guess; a same-length suggestion that only swaps within a pair fixes the guess.
+static int confusableGroup(unichar c)
+{
+    switch (c) {
+    case 0x0443: case 0x04AF: return 1; // у ү
+    case 0x043E: case 0x04E9: return 2; // о ө
+    case 0x044D: case 0x0435: return 3; // э е
+    case 0x0438: case 0x044B: return 4; // и ы
+    default: return 0;
+    }
+}
+
+static NSString* vowelVariant(NSString* word, NSArray<NSString*>* candidates)
+{
+    NSString* match = nil;
+    for (NSString* cand in candidates) {
+        if (cand.length != word.length)
+            continue;
+        BOOL ok = YES;
+        BOOL differs = NO;
+        for (NSUInteger i = 0; i < word.length && ok; ++i) {
+            unichar a = [word characterAtIndex:i];
+            unichar b = [cand characterAtIndex:i];
+            if (a == b)
+                continue;
+            differs = YES;
+            int g = confusableGroup(a);
+            ok = (g != 0 && g == confusableGroup(b));
+        }
+        if (!ok || !differs)
+            continue;
+        if (match && ![match isEqualToString:cand])
+            return nil;
+        match = cand;
+    }
+    return match;
+}
+
+// Held-down or stuttered keys produce a doubled letter; dropping one copy is
+// only accepted when Hunspell independently proposes the result.
+static NSString* undoubledVariant(NSString* word, NSArray<NSString*>* candidates)
+{
+    NSMutableSet<NSString*>* shortened = [NSMutableSet set];
+    for (NSUInteger i = 1; i < word.length; ++i) {
+        if ([word characterAtIndex:i] != [word characterAtIndex:i - 1])
+            continue;
+        NSMutableString* s = [word mutableCopy];
+        [s deleteCharactersInRange:NSMakeRange(i, 1)];
+        [shortened addObject:s];
+    }
+    if (shortened.count == 0)
+        return nil;
+
+    NSString* match = nil;
+    for (NSString* cand in candidates) {
+        if (![shortened containsObject:cand])
+            continue;
+        if (match && ![match isEqualToString:cand])
+            return nil;
+        match = cand;
+    }
+    return match;
+}
+
 - (NSString*)maybeAutocorrect:(NSString*)word
 {
     if (!_hunspell || !word || !isEligibleWord(word))
@@ -130,30 +195,26 @@ static NSString* applyCase(NSString* original, NSString* suggestion)
     if (_hunspell->spell(utf8))
         return word;
 
-    std::vector<std::string> suggestions = _hunspell->suggest(utf8);
-    if (suggestions.empty())
+    NSString* lower = word.lowercaseString;
+    NSMutableArray<NSString*>* candidates = [NSMutableArray array];
+    for (const auto& s : _hunspell->suggest(utf8)) {
+        NSString* cand = [NSString stringWithUTF8String:s.c_str()];
+        if (cand.length == 0 || !isEligibleWord(cand))
+            continue; // drops multi-word splits such as "ном юм"
+        cand = cand.lowercaseString;
+        if (![cand isEqualToString:lower])
+            [candidates addObject:cand];
+    }
+    if (candidates.count == 0)
         return word;
 
-    NSString* chosen = nil;
-    if (suggestions.size() == 1) {
-        chosen = [NSString stringWithUTF8String:suggestions[0].c_str()];
-    } else {
-        int closeCount = 0;
-        NSString* close = nil;
-        for (const auto& s : suggestions) {
-            NSString* cand = [NSString stringWithUTF8String:s.c_str()];
-            if (!cand)
-                continue;
-            if (levenshtein(word, cand) <= 1) {
-                closeCount++;
-                close = cand;
-            }
-        }
-        if (closeCount == 1)
-            chosen = close;
-    }
+    NSString* chosen = vowelVariant(lower, candidates);
+    if (!chosen)
+        chosen = undoubledVariant(lower, candidates);
+    if (!chosen && candidates.count == 1 && levenshtein(lower, candidates[0]) <= 1)
+        chosen = candidates[0];
 
-    if (!chosen || chosen.length == 0 || [chosen isEqualToString:word])
+    if (!chosen)
         return word;
 
     return applyCase(word, chosen);

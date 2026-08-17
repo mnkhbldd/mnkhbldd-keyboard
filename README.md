@@ -47,7 +47,7 @@ cd macos && make && make install
 
 Then add **Buuz** under System Settings → Keyboard → Input Sources.
 
-On commit (space / Enter), Buuz may autocorrect a converted Cyrillic word when Hunspell has a single high-confidence suggestion.
+On commit (space / Enter), Buuz may autocorrect a converted Cyrillic word — fixing vowels Latin cannot distinguish (`уйлчилгээ` → `үйлчилгээ`) and accidental doubled letters (`сайнн` → `сайн`). Ambiguous words are left as typed.
 
 ## License
 

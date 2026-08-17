@@ -36,22 +36,31 @@ int main(int argc, char** argv)
         if (![digits isEqualToString:@"бууз2"])
             return fail(@"digits should be skipped");
 
-        // Unique 1-edit suggestion (болно); other near-misses are farther.
-        NSString* typo = [checker maybeAutocorrect:@"болнө"];
-        if (![typo isEqualToString:@"болно"])
-            return fail([NSString stringWithFormat:@"expected болно, got %@", typo]);
+        // Latin "u" mapped to the wrong Cyrillic vowel.
+        NSString* vowel = [checker maybeAutocorrect:@"уйлчилгээ"];
+        if (![vowel isEqualToString:@"үйлчилгээ"])
+            return fail([NSString stringWithFormat:@"expected үйлчилгээ, got %@", vowel]);
 
-        // Several close suggestions → leave unchanged.
-        NSString* ambiguous = [checker maybeAutocorrect:@"сайнн"];
-        if (![ambiguous isEqualToString:@"сайнн"])
+        // Doubled letter, even though Hunspell also offers suffixed forms.
+        NSString* doubled = [checker maybeAutocorrect:@"сайнн"];
+        if (![doubled isEqualToString:@"сайн"])
+            return fail([NSString stringWithFormat:@"expected сайн, got %@", doubled]);
+
+        // No vowel swap or doubled letter, several suggestions → leave alone.
+        NSString* ambiguous = [checker maybeAutocorrect:@"тсахим"];
+        if (![ambiguous isEqualToString:@"тсахим"])
             return fail([NSString stringWithFormat:@"ambiguous typo should stay: %@", ambiguous]);
 
         NSString* caps = [checker maybeAutocorrect:@"САЙН"];
         if (![caps isEqualToString:@"САЙН"])
             return fail([NSString stringWithFormat:@"all-caps good word changed: %@", caps]);
 
-        printf("ok (сайн unchanged, болнө→%s, сайнн unchanged)\n",
-               typo.UTF8String);
+        NSString* capsTypo = [checker maybeAutocorrect:@"Сайнн"];
+        if (![capsTypo isEqualToString:@"Сайн"])
+            return fail([NSString stringWithFormat:@"expected Сайн, got %@", capsTypo]);
+
+        printf("ok (уйлчилгээ→%s, сайнн→%s, тсахим unchanged)\n",
+               vowel.UTF8String, doubled.UTF8String);
         return 0;
     }
 }

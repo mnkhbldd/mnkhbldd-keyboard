@@ -71,7 +71,13 @@ make uninstall
 
 ## Autocorrect
 
-On word commit, Buuz runs Hunspell against the bundled `mn_MN` dictionary. A word is replaced only when it is misspelled and there is a single high-confidence suggestion (one Hunspell suggestion, or exactly one suggestion with edit distance 1). Digits, punctuation, and 1-letter tokens are left unchanged.
+On word commit, Buuz runs Hunspell against the bundled `mn_MN` dictionary. A misspelled word is replaced only when one of these gives an unambiguous answer:
+
+1. **Vowel swap** — a same-length suggestion that differs only within a pair Latin input cannot distinguish (`у`/`ү`, `о`/`ө`, `э`/`е`, `и`/`ы`), e.g. `уйлчилгээ` → `үйлчилгээ`.
+2. **Doubled letter** — dropping one of two identical adjacent letters yields a word Hunspell suggested, e.g. `сайнн` → `сайн`, `монголл` → `монгол`.
+3. **Sole suggestion** — Hunspell returns exactly one candidate, within edit distance 1.
+
+Anything else is left as typed. Multi-word suggestions (`ном юм`), digits, punctuation, and 1-letter tokens are never applied.
 
 Dictionary files are fetched at build time:
 
