@@ -17,7 +17,7 @@ Prebuilt app — **no Xcode / compiler required**:
 
 ```bash
 brew tap mnkhbldd/mnkhbldd-keyboard https://github.com/mnkhbldd/mnkhbldd-keyboard
-brew update
+brew trust --cask mnkhbldd/mnkhbldd-keyboard/buuz
 brew install --cask buuz
 ```
 
