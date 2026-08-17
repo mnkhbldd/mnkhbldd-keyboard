@@ -17,7 +17,16 @@ Prebuilt app — **no Xcode / compiler required**:
 
 ```bash
 brew tap mnkhbldd/mnkhbldd-keyboard https://github.com/mnkhbldd/mnkhbldd-keyboard
+brew update
 brew install --cask buuz
+```
+
+If you already installed Buuz earlier with `make install`, remove or overwrite it first:
+
+```bash
+rm -rf ~/Library/Input\ Methods/Buuz.app
+brew install --cask buuz
+# or: brew install --cask --force buuz
 ```
 
 Then add **Buuz** under System Settings → Keyboard → Input Sources.
