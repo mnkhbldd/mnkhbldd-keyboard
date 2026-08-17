@@ -56,10 +56,7 @@ $(BUILD_DIR)/$(APP_BUNDLE): $(OBJS) Info.plist $(DICT_AFF) $(DICT_DIC) Resources
 	$(OBJCXX) $(OBJS) -o $(MACOS_DIR)/$(APP_NAME) $(LDFLAGS)
 	cp Info.plist $(CONTENTS)/
 	cp Resources/en.lproj/InfoPlist.strings $(RES_DIR)/en.lproj/
-	@if [ -f Resources/buuz.tiff ]; then cp Resources/buuz.tiff $(RES_DIR)/; \
-	 elif [ -f Resources/buuz.ico ]; then \
-	   sips -s format tiff Resources/buuz.ico --out $(RES_DIR)/buuz.tiff 2>/dev/null || true; \
-	 fi
+	cp Resources/buuzTemplate.tiff $(RES_DIR)/
 	cp $(DICT_AFF) $(DICT_DIC) $(RES_DIR)/dict/
 	@if [ -f $(DICT_DIR)/LICENSE ]; then cp $(DICT_DIR)/LICENSE $(RES_DIR)/dict/; fi
 	@if [ -f $(DICT_DIR)/README.md ]; then cp $(DICT_DIR)/README.md $(RES_DIR)/dict/; fi

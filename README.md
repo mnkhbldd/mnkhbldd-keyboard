@@ -21,9 +21,10 @@ brew trust --cask mnkhbldd/mnkhbldd-keyboard/buuz
 brew install --cask buuz
 ```
 
-If you already installed Buuz earlier with `make install`, remove or overwrite it first:
+If you already installed Buuz earlier with `make install` or the old source formula (`brew install buuz` without `--cask`), remove it first:
 
 ```bash
+brew uninstall --formula buuz 2>/dev/null || true
 rm -rf ~/Library/Input\ Methods/Buuz.app
 brew install --cask buuz
 # or: brew install --cask --force buuz
@@ -44,8 +45,6 @@ Uninstall:
 ```bash
 brew uninstall --cask buuz
 ```
-
-To build from source with Homebrew instead: `brew install buuz` (formula; needs Command Line Tools).
 
 ### macOS (from source)
 

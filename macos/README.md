@@ -51,7 +51,12 @@ Uninstall:
 brew uninstall --cask buuz
 ```
 
-Source formula (builds locally; needs Command Line Tools): `brew install buuz`
+If an earlier install used the source formula (`brew install buuz` without `--cask`), switch to the cask:
+
+```bash
+brew uninstall --formula buuz
+brew install --cask buuz
+```
 
 ## Build from source
 

@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.8</string>
+	<string>1.0.9</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.8</string>
+	<string>1.0.9</string>
 	<key>ComponentInputModeDict</key>
 	<dict>
 		<key>tsInputModeListKey</key>
@@ -29,13 +29,13 @@
 				<key>TISIntendedLanguage</key>
 				<string>mn</string>
 				<key>tsInputModeAlternateMenuIconFileKey</key>
-				<string>buuz.tiff</string>
+				<string>buuzTemplate.tiff</string>
 				<key>tsInputModeDefaultStateKey</key>
 				<true/>
 				<key>tsInputModeIsVisibleKey</key>
 				<true/>
 				<key>tsInputModeMenuIconFileKey</key>
-				<string>buuz.tiff</string>
+				<string>buuzTemplate.tiff</string>
 				<key>tsInputModePrimaryInScriptKey</key>
 				<true/>
 				<key>tsInputModeScriptKey</key>
@@ -67,6 +67,6 @@
 		<string>Latn</string>
 	</array>
 	<key>tsInputMethodIconFileKey</key>
-	<string>buuz.tiff</string>
+	<string>buuzTemplate.tiff</string>
 </dict>
 </plist>
