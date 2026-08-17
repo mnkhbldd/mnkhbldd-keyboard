@@ -51,10 +51,11 @@ dict: $(DICT_AFF) $(DICT_DIC)
 $(DICT_AFF) $(DICT_DIC):
 	./fetch-dict.sh
 
-$(BUILD_DIR)/$(APP_BUNDLE): $(OBJS) Info.plist $(DICT_AFF) $(DICT_DIC)
-	@mkdir -p $(MACOS_DIR) $(RES_DIR)/dict
+$(BUILD_DIR)/$(APP_BUNDLE): $(OBJS) Info.plist $(DICT_AFF) $(DICT_DIC) Resources/en.lproj/InfoPlist.strings
+	@mkdir -p $(MACOS_DIR) $(RES_DIR)/dict $(RES_DIR)/en.lproj
 	$(OBJCXX) $(OBJS) -o $(MACOS_DIR)/$(APP_NAME) $(LDFLAGS)
 	cp Info.plist $(CONTENTS)/
+	cp Resources/en.lproj/InfoPlist.strings $(RES_DIR)/en.lproj/
 	@if [ -f Resources/buuz.tiff ]; then cp Resources/buuz.tiff $(RES_DIR)/; \
 	 elif [ -f Resources/buuz.ico ]; then \
 	   sips -s format tiff Resources/buuz.ico --out $(RES_DIR)/buuz.tiff 2>/dev/null || true; \
