@@ -7,8 +7,6 @@ cask "buuz" do
   desc "Mongolian Cyrillic input method — type Latin, get Cyrillic"
   homepage "https://github.com/mnkhbldd/mnkhbldd-keyboard"
 
-  depends_on macos: :high_sierra
-
   input_method "Buuz.app"
 
   # Ad-hoc signed build: clear quarantine so Input Method Kit can load it.
