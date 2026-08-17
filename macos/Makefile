@@ -1,6 +1,8 @@
 # Buuz macOS Input Method
 #
 # Builds Buuz.app — same conversion engine as the Windows IME.
+#
+# Release (universal): make clean && make ARCHS="arm64 x86_64"
 
 APP_NAME   := Buuz
 APP_BUNDLE := $(APP_NAME).app
@@ -16,6 +18,13 @@ CXXFLAGS := -std=c++17 -O2 -fobjc-arc \
             -I.
 LDFLAGS  := -framework Cocoa -framework InputMethodKit -framework Carbon
 
+# Optional: ARCHS="arm64 x86_64" for a universal release binary
+ifneq ($(strip $(ARCHS)),)
+  ARCH_FLAGS := $(foreach a,$(ARCHS),-arch $(a))
+  CXXFLAGS   += $(ARCH_FLAGS)
+  LDFLAGS    += $(ARCH_FLAGS)
+endif
+
 CPP_SRCS := Composer.cpp CompString.cpp InputContext.cpp Globals.cpp HelperFunctions.cpp
 MM_SRCS  := Init.mm BuuzInputController.mm
 
@@ -23,7 +32,7 @@ CPP_OBJS := $(addprefix $(BUILD_DIR)/,$(CPP_SRCS:.cpp=.o))
 MM_OBJS  := $(addprefix $(BUILD_DIR)/,$(MM_SRCS:.mm=.o))
 OBJS     := $(CPP_OBJS) $(MM_OBJS)
 
-.PHONY: all clean install uninstall reinstall
+.PHONY: all clean install uninstall reinstall package
 
 all: $(BUILD_DIR)/$(APP_BUNDLE)
 
@@ -56,3 +65,8 @@ uninstall:
 	./install.sh --uninstall
 
 reinstall: uninstall install
+
+# Universal .app zip for GitHub Releases / Homebrew Cask
+package: clean
+	$(MAKE) ARCHS="arm64 x86_64" all
+	./package-release.sh

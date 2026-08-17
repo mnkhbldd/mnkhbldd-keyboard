@@ -19,12 +19,14 @@ Type Latin → get Cyrillic, e.g. `buuz id'ye` → `бууз идье`.
 
 ## Install with Homebrew (recommended)
 
+Prebuilt app — **no Xcode / compiler required**:
+
 ```bash
 brew tap mnkhbldd/mnkhbldd-keyboard https://github.com/mnkhbldd/mnkhbldd-keyboard
-brew install buuz
+brew install --cask buuz
 ```
 
-This builds Buuz and installs it to `~/Library/Input Methods/Buuz.app`.
+This downloads `Buuz.app` into `~/Library/Input Methods/`.
 
 Then:
 
@@ -38,11 +40,10 @@ If it does not show up, log out and back in once.
 Uninstall:
 
 ```bash
-buuz-ime uninstall
-brew uninstall buuz
+brew uninstall --cask buuz
 ```
 
-After a `brew upgrade buuz`, re-link if needed: `buuz-ime install`.
+Source formula (builds locally; needs Command Line Tools): `brew install buuz`
 
 ## Build from source
 
@@ -52,6 +53,13 @@ Requires Xcode Command Line Tools (`clang++`), not the full Xcode app:
 cd macos
 make
 make install
+```
+
+Release zip (universal arm64 + x86_64):
+
+```bash
+cd macos
+make package
 ```
 
 ## Uninstall (from source)

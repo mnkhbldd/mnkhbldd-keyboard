@@ -11,21 +11,24 @@ Based on [Buuz](https://github.com/odbayar/buuz) by Odbayar Nyamtseren, with a *
 - **Windows** — classic IMM IME DLL (`Buuz.sln`)
 - **macOS** — see [`macos/README.md`](macos/README.md)
 
-### macOS (Homebrew)
+### macOS (Homebrew — recommended)
+
+Prebuilt app — **no Xcode / compiler required**:
 
 ```bash
 brew tap mnkhbldd/mnkhbldd-keyboard https://github.com/mnkhbldd/mnkhbldd-keyboard
-brew install buuz
+brew install --cask buuz
 ```
 
-Needs [Homebrew](https://brew.sh) (and its Command Line Tools). Then add **Buuz** under System Settings → Keyboard → Input Sources.
+Then add **Buuz** under System Settings → Keyboard → Input Sources.
 
 Uninstall:
 
 ```bash
-buuz-ime uninstall
-brew uninstall buuz
+brew uninstall --cask buuz
 ```
+
+To build from source with Homebrew instead: `brew install buuz` (formula; needs Command Line Tools).
 
 ### macOS (from source)
 
