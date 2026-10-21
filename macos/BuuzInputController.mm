@@ -21,6 +21,11 @@
 {
     InputContext* _imc;
     BYTE _keyState[256];
+    // Last autocorrection, revertible by an immediate Backspace once the
+    // character that triggered it (_undoSuffix) has been inserted.
+    NSString* _undoTyped;
+    NSString* _undoCorrected;
+    NSString* _undoSuffix;
 }
 
 - (id)initWithServer:(IMKServer*)server delegate:(id)delegate client:(id)client
@@ -90,6 +95,10 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     if (prv->pendingCommit) {
         NSString* result = utf16ToNSString(cs.resultStr.ptr(), cs.resultStr.size());
         NSString* corrected = [[SpellChecker shared] maybeAutocorrect:result];
+        if (![corrected isEqualToString:result]) {
+            _undoTyped = result;
+            _undoCorrected = corrected;
+        }
         [self clearMarkedText:client];
         [self insertPlainText:corrected client:client];
         cs.clearResult();
@@ -152,6 +161,34 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     return 0;
 }
 
+- (void)clearUndo
+{
+    _undoTyped = nil;
+    _undoCorrected = nil;
+    _undoSuffix = nil;
+}
+
+// Replaces "<corrected><suffix>" before the caret with what the user typed,
+// but only after reading it back from the client, so an app that moved the
+// caret or cannot report its text just gets a normal Backspace.
+- (BOOL)revertCorrection:(NSString*)typed
+               corrected:(NSString*)corrected
+                  suffix:(NSString*)suffix
+                  client:(id)client
+{
+    NSString* expected = [corrected stringByAppendingString:suffix];
+    NSRange sel = [client selectedRange];
+    if (sel.location == NSNotFound || sel.length != 0 || sel.location < expected.length)
+        return NO;
+    NSRange range = NSMakeRange(sel.location - expected.length, expected.length);
+    NSString* actual = [[client attributedSubstringFromRange:range] string];
+    if (![actual isEqualToString:expected])
+        return NO;
+    [client insertText:typed replacementRange:range];
+    [[SpellChecker shared] learnWord:typed];
+    return YES;
+}
+
 - (BOOL)isComposing
 {
     if (!_imc)
@@ -189,9 +226,18 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
         return NO;
     }
 
+    NSString* undoTyped = _undoTyped;
+    NSString* undoCorrected = _undoCorrected;
+    NSString* undoSuffix = _undoSuffix;
+    [self clearUndo];
+
     NSUInteger mods = flags & NSEventModifierFlagDeviceIndependentFlagsMask;
     if (mods & (NSEventModifierFlagCommand | NSEventModifierFlagControl))
         return NO;
+
+    if (keyCode == 51 && undoSuffix && ![self isComposing] &&
+        [self revertCorrection:undoTyped corrected:undoCorrected suffix:undoSuffix client:client])
+        return YES;
 
     [self updateKeyStateFromModifiers:flags];
 
@@ -241,6 +287,8 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
             return NO;
         if (ch >= 0x20 || ch == '\t') {
             [self insertPlainText:string client:client];
+            if (_undoCorrected)
+                _undoSuffix = string;
             return YES;
         }
     }
@@ -274,6 +322,7 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
 - (void)commitComposition:(id)sender
 {
     [self commitIfNeeded:[self activeClient:sender]];
+    [self clearUndo];
 }
 
 - (void)activateServer:(id)sender
@@ -286,6 +335,7 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
 - (void)deactivateServer:(id)sender
 {
     NSLog(@"[Buuz] deactivateServer");
+    [self clearUndo];
     if (!_imc)
         return;
     if ([self isComposing] && composer) {

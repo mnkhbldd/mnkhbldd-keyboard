@@ -84,13 +84,16 @@ make uninstall
 
 ## Autocorrect
 
-On word commit, Buuz runs Hunspell against the bundled `mn_MN` dictionary. A misspelled word is replaced only when one of these gives an unambiguous answer:
+On word commit, Buuz checks the word with Hunspell (bundled `mn_MN` dictionary). A misspelled word is replaced in two steps:
 
-1. **Vowel swap** — a same-length suggestion that differs only within a pair Latin input cannot distinguish (`у`/`ү`, `о`/`ө`, `э`/`е`, `и`/`ы`), e.g. `уйлчилгээ` → `үйлчилгээ`.
-2. **Doubled letter** — dropping one of two identical adjacent letters yields a word Hunspell suggested, e.g. `сайнн` → `сайн`, `монголл` → `монгол`.
-3. **Sole suggestion** — Hunspell returns exactly one candidate, within edit distance 1.
+1. **Exact repair** — swap vowels Latin cannot distinguish (`у`/`ү`, `о`/`ө`, `э`/`е`, `и`/`ы`) and/or drop one of a doubled letter. Applied when exactly one result is a real word, or the corpus clearly prefers one: `уйлчилгээ` → `үйлчилгээ`, `оорчлолт` → `өөрчлөлт`, `сайнн` → `сайн`.
+2. **Ranked correction** — every word within one typo (plus vowel swaps) is scored by how often it appears in Mongolian text against how likely that typo is on a QWERTY keyboard (adjacent keys, a missed `h` in `sh`/`ch`/`kh`, a dropped letter of `аа`/`оо`, ...). The best word is applied only when it holds ≥95% of the probability, so close calls stay as typed: `улаанбаатр` → `улаанбаатар`, `сургуль` → `сургууль`.
 
-Anything else is left as typed. Multi-word suggestions (`ном юм`), digits, punctuation, and 1-letter tokens are never applied.
+Words the corpus knows well but Hunspell does not (names, loanwords) are left alone, as are digits, punctuation and 1-letter tokens.
+
+**Undo:** press Backspace right after a correction to get back what you typed. Buuz remembers that word and never corrects it again (`~/Library/Application Support/Buuz/learned-words.txt`; delete a line to forget it).
+
+Measure changes with `make eval-spell` (add `SHOW=1` for failures, `RARE=1` for uncommon words). It spells sampled words in Latin as a user would, adds one Latin typo, and runs them through the composer and autocorrect.
 
 Dictionary files are fetched at build time:
 
@@ -99,7 +102,7 @@ cd macos
 ./fetch-dict.sh
 ```
 
-Credit: [bataak/dict-mn](https://github.com/bataak/dict-mn) (LPPL 1.3). Hunspell is vendored under `third_party/hunspell/`.
+Credit: [bataak/dict-mn](https://github.com/bataak/dict-mn) (LPPL 1.3). Hunspell is vendored under `third_party/hunspell/`. Word frequencies (`Resources/dict/mn_freq.txt`, committed) are counted by `tools/build-freq.py` from Mongolian Wikipedia (CC BY-SA 4.0) and the Leipzig Corpora Collection (`mon_news_2020_100K`, `mon_wikipedia_2021_100K`).
 
 ## Conversion table
 
