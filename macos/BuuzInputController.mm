@@ -189,8 +189,10 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     return YES;
 }
 
-// Ctrl+Option+M: autocorrect every word in the selection. Apps that cannot
-// report the selected text get a beep instead of a blind replacement.
+// Ctrl+Shift+M: autocorrect every word in the selection. Ctrl+Option is
+// VoiceOver's modifier and what window managers bind; Ctrl+Shift is free.
+// Apps that cannot report the selected text get a beep instead of a blind
+// replacement.
 - (void)fixSelection:(id)client
 {
     if ([self isComposing])
@@ -258,7 +260,7 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     const NSUInteger chord = NSEventModifierFlagCommand | NSEventModifierFlagControl |
                              NSEventModifierFlagOption | NSEventModifierFlagShift;
     if (keyCode == 46 &&
-        (mods & chord) == (NSEventModifierFlagControl | NSEventModifierFlagOption)) {
+        (mods & chord) == (NSEventModifierFlagControl | NSEventModifierFlagShift)) {
         [self fixSelection:client];
         return YES;
     }
