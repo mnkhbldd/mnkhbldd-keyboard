@@ -11,6 +11,8 @@
 
 - (BOOL)loadFromDirectory:(NSString*)directory;
 - (NSString*)maybeAutocorrect:(NSString*)word;
+// Applies maybeAutocorrect to every word, leaving spacing and punctuation.
+- (NSString*)autocorrectText:(NSString*)text;
 
 // Words the user rejected a correction for are never corrected again.
 - (void)learnWord:(NSString*)word;

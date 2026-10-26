@@ -68,6 +68,11 @@ int main(int argc, char** argv)
         if (![vowels isEqualToString:@"өөрчлөлт"])
             return fail([NSString stringWithFormat:@"expected өөрчлөлт, got %@", vowels]);
 
+        NSString* para = [checker autocorrectText:@"Сайнн байна уу? уйлчилгээ, бууз2 ok.\n улаанбаатр"];
+        NSString* paraWant = @"Сайн байна уу? үйлчилгээ, бууз2 ok.\n улаанбаатар";
+        if (![para isEqualToString:paraWant])
+            return fail([NSString stringWithFormat:@"selection fix: got %@", para]);
+
         NSString* learnedPath = [NSTemporaryDirectory()
             stringByAppendingPathComponent:@"buuz-test-learned.txt"];
         [[NSFileManager defaultManager] removeItemAtPath:learnedPath error:nil];

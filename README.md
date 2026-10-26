@@ -54,7 +54,7 @@ cd macos && make && make install
 
 Then add **Buuz** under System Settings → Keyboard → Input Sources.
 
-On commit (space / Enter), Buuz may autocorrect a converted Cyrillic word — fixing vowels Latin cannot distinguish (`уйлчилгээ` → `үйлчилгээ`), doubled letters (`сайнн` → `сайн`) and common typos (`улаанбаатр` → `улаанбаатар`). Ambiguous words are left as typed. Press Backspace right after a correction to undo it; Buuz then stops correcting that word.
+On commit (space / Enter), Buuz may autocorrect a converted Cyrillic word — fixing vowels Latin cannot distinguish (`уйлчилгээ` → `үйлчилгээ`), doubled letters (`сайнн` → `сайн`) and common typos (`улаанбаатр` → `улаанбаатар`). Ambiguous words are left as typed. Press Backspace right after a correction to undo it; Buuz then stops correcting that word. To fix text you already typed, select it and press **Ctrl+Option+M**.
 
 ## License
 

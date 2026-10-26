@@ -464,4 +464,23 @@ NSString* applyCase(NSString* original, NSString* suggestion)
     return applyCase(word, fromU16(chosen));
 }
 
+- (NSString*)autocorrectText:(NSString*)text
+{
+    if (!_hunspell || text.length == 0)
+        return text;
+    NSMutableString* out = [text mutableCopy];
+    __block NSInteger shift = 0;
+    [text enumerateSubstringsInRange:NSMakeRange(0, text.length)
+                             options:NSStringEnumerationByWords
+                          usingBlock:^(NSString* word, NSRange range, NSRange, BOOL*) {
+        NSString* fixed = [self maybeAutocorrect:word];
+        if ([fixed isEqualToString:word])
+            return;
+        [out replaceCharactersInRange:NSMakeRange(range.location + shift, range.length)
+                           withString:fixed];
+        shift += (NSInteger)fixed.length - (NSInteger)range.length;
+    }];
+    return out;
+}
+
 @end

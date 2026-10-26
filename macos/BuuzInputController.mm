@@ -189,6 +189,29 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     return YES;
 }
 
+// Ctrl+Option+M: autocorrect every word in the selection. Apps that cannot
+// report the selected text get a beep instead of a blind replacement.
+- (void)fixSelection:(id)client
+{
+    if ([self isComposing])
+        [self commitIfNeeded:client];
+    [self clearUndo];
+
+    NSRange sel = [client selectedRange];
+    if (sel.location == NSNotFound || sel.length == 0) {
+        NSBeep();
+        return;
+    }
+    NSString* text = [[client attributedSubstringFromRange:sel] string];
+    if (text.length != sel.length) {
+        NSBeep();
+        return;
+    }
+    NSString* fixed = [[SpellChecker shared] autocorrectText:text];
+    if (![fixed isEqualToString:text])
+        [client insertText:fixed replacementRange:sel];
+}
+
 - (BOOL)isComposing
 {
     if (!_imc)
@@ -232,6 +255,13 @@ static NSString* utf16ToNSString(const WCHAR* data, DWORD len)
     [self clearUndo];
 
     NSUInteger mods = flags & NSEventModifierFlagDeviceIndependentFlagsMask;
+    const NSUInteger chord = NSEventModifierFlagCommand | NSEventModifierFlagControl |
+                             NSEventModifierFlagOption | NSEventModifierFlagShift;
+    if (keyCode == 46 &&
+        (mods & chord) == (NSEventModifierFlagControl | NSEventModifierFlagOption)) {
+        [self fixSelection:client];
+        return YES;
+    }
     if (mods & (NSEventModifierFlagCommand | NSEventModifierFlagControl))
         return NO;
 

@@ -1,6 +1,6 @@
 cask "buuz" do
-  version "1.0.10"
-  sha256 "69d5d1ffd73cb6e729f73f90f7e68dc0884a59775f691b43ff71a86642cfd2f5"
+  version "1.0.11"
+  sha256 "c94b8b8b479d8f4c07bc0061e9511c4565357b4e60257753006cdec16f4b87c8"
 
   url "https://github.com/mnkhbldd/mnkhbldd-keyboard/releases/download/v#{version}/Buuz-#{version}.zip"
   name "Buuz"

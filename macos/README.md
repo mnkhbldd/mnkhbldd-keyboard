@@ -93,6 +93,8 @@ Words the corpus knows well but Hunspell does not (names, loanwords) are left al
 
 **Undo:** press Backspace right after a correction to get back what you typed. Buuz remembers that word and never corrects it again (`~/Library/Application Support/Buuz/learned-words.txt`; delete a line to forget it).
 
+**Fix a selection:** select text and press **Ctrl+Option+M** to correct every word in it with the same rules (handy for text typed earlier or pasted). Undo it with Cmd+Z in the app. Apps that do not let input methods read the selection beep instead.
+
 Measure changes with `make eval-spell` (add `SHOW=1` for failures, `RARE=1` for uncommon words). It spells sampled words in Latin as a user would, adds one Latin typo, and runs them through the composer and autocorrect.
 
 Dictionary files are fetched at build time:
